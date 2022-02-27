@@ -243,7 +243,14 @@ public class CalculadorImpuestos {
      */
     public Vehiculo buscarVehiculoPorLinea() {
         Vehiculo buscado = null;
-        String linea = null;
+        String linea = JOptionPane.showInputDialog("Ingrese la linea: ");
+
+        for(Vehiculo li : vehiculos) {
+            if (li.darLinea().equalsIgnoreCase(linea)) {
+                buscado = li;
+                break;
+            }
+        }
 
         // TODO: Usando JOptionPane, leer la línea del vehículo a buscar
 
