@@ -51,6 +51,10 @@ public class CalculadorImpuestos {
      * Vehículo actual mostrado en la aplicación.
      */
     private int posVehiculoActual;
+    
+    private List<String[]> rangoValoresList = new ArrayList<>();
+    
+    private double pago;
 
 
     // -----------------------------------------------------------------
@@ -66,6 +70,7 @@ public class CalculadorImpuestos {
      */
     public CalculadorImpuestos() throws Exception {
         cargarVehiculos("data/vehiculos.txt");
+        cargarRagnosImpuestos("data/impuestos.properties");
     }
 
     // ----------------------------------------------------------------
@@ -120,6 +125,36 @@ public class CalculadorImpuestos {
     }
 
     /**
+     * Carga los datos de los rangos de impuestos de los vehículos que maneja el calculador de impuestos. <br>
+     * <b>post: </b> Se cargan todos los rangos de impuestos de los vehículos del archivo con sus impuestos.properties
+     *
+     * @param pArchivo Nombre del archivo donde se encuentran los datos de los vehículos. pArchivo != null.
+     * @return 
+     * @throws Exception Si ocurre algún error cargando los datos.
+     */
+	private void cargarRagnosImpuestos(String pArchivo) throws Exception {
+
+		try (InputStream input = new FileInputStream(pArchivo)) {
+
+			Properties prop = new Properties();
+
+			// load a properties file
+			prop.load(input);	
+			
+			prop.forEach((key, value) -> {
+				if (!key.equals("numero.rangos")){
+					rangoValoresList.add(((String) value).split(","));
+				}
+			});
+
+		} catch (IOException e) {
+			throw new Exception("Error al cargar los datos almacenados de los rangos de los ipuestos de los vehículos.");
+		}
+	}
+    
+    
+
+    /**
      * Calcula el pago de impuesto que debe hacer el vehículo actual. <br>
      * <b>pre:</b> Las listas de rangos y vehículos están inicializadas.
      *
@@ -129,12 +164,31 @@ public class CalculadorImpuestos {
      * @return Valor a pagar de acuerdo con las características del vehículo y los descuentos que se pueden aplicar.
      */
     public double calcularPago(boolean descProntoPago, boolean descServicioPublico, boolean descTrasladoCuenta) {
-        double pago = 0.0;
+        this.pago = 0.0;
         double precio = darVehiculoActual().darPrecio();
-
         // TODO: Encontrar el valor del pago de impuesto de acuerdo a los datos de entrada
+        this.rangoValoresList.forEach(rango ->{
+        	double minimo = Double.parseDouble(rango[0]);
+        	double maximo = Double.parseDouble(rango[1]);
+        	double porcentaje = Double.parseDouble(rango[2]);
+        	if(precio>minimo && precio<=maximo) {
+        		this.pago = precio*porcentaje/100;
+        	}       	
+        });
+        
+        if(descProntoPago) {
+    		this.pago = this.pago*0.9;
+    	}
+        
+    	if(descServicioPublico) {
+    		this.pago = this.pago-50000;
+    	}
+    	
+    	if(descTrasladoCuenta) {
+    		this.pago = this.pago*0.95;
+    	}
 
-        return pago;
+        return this.pago;
     }
 
     /**
@@ -213,7 +267,15 @@ public class CalculadorImpuestos {
      */
     public Vehiculo buscarVehiculoMasCaro() {
         Vehiculo masCaro = null;
-
+        for (int i = 0; i < vehiculos.length; i++) {
+        	if(masCaro!=null) {
+        		if(vehiculos[i].darPrecio()>masCaro.darPrecio()) {
+        			masCaro = vehiculos[i];
+        		}
+        	}else {
+        		masCaro = vehiculos[i];
+        	}
+        }
         // TODO: Buscar el vehículo más caro del arreglo de vehículos
 
         return masCaro;
@@ -243,14 +305,7 @@ public class CalculadorImpuestos {
      */
     public Vehiculo buscarVehiculoPorLinea() {
         Vehiculo buscado = null;
-        String linea = JOptionPane.showInputDialog("Ingrese la linea: ");
-
-        for(Vehiculo li : vehiculos) {
-            if (li.darLinea().equalsIgnoreCase(linea)) {
-                buscado = li;
-                break;
-            }
-        }
+        String linea = null;
 
         // TODO: Usando JOptionPane, leer la línea del vehículo a buscar
 
@@ -268,16 +323,7 @@ public class CalculadorImpuestos {
         Vehiculo buscado = null;
 
         // TODO: Buscar el vehículo más antiguo del sistema
-        int masAntiguo = 3000;
-        int anio;
-        for (int i=0; i<vehiculos.length; i++){
-            anio = Integer.parseInt(vehiculos[i].darAnio());
-            if (anio < masAntiguo){
-                masAntiguo = anio;
-                posVehiculoActual = i;
-                buscado = darVehiculoActual();
-            }
-        }
+
         return buscado;
     }
 
@@ -288,11 +334,7 @@ public class CalculadorImpuestos {
      */
     public double promedioPreciosVehiculos() {
         double promedio = 0.0;
-        //promedio = promedio + vehiculos[0].darPrecio();
-        for (Vehiculo v: vehiculos){
-            promedio = promedio + v.darPrecio();
-        }
-        promedio = (promedio/vehiculos.length);
+
         return promedio;
     }
 
