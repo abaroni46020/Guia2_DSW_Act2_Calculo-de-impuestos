@@ -287,9 +287,18 @@ public class CalculadorImpuestos {
      *
      * @return El primer vehículo de la marca. Si no encuentra ninguno retorna null.
      */
-    public Vehiculo buscarVehiculoPorMarca() {
+     public Vehiculo buscarVehiculoPorMarca() {
         Vehiculo buscado = null;
-        String marca = null;
+        String marca = JOptionPane.showInputDialog("Escriba la Marca: ", "Mazda");
+        if (marca != null){
+            for(Vehiculo ma : vehiculos) {
+                //Se usa "equalsIgnoreCase" para que no tenga en cuenta las mayúsculas y minusculas
+                if(marca.equalsIgnoreCase(ma.darMarca())) {
+                    buscado = ma;
+                }
+            }
+        }
+
 
         // TODO: Usando JOptionPane, leer la marca del vehículo a buscar
 
