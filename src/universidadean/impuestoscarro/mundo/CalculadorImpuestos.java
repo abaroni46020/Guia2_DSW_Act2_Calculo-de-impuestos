@@ -323,7 +323,16 @@ public class CalculadorImpuestos {
         Vehiculo buscado = null;
 
         // TODO: Buscar el vehículo más antiguo del sistema
-
+	int masAntiguo = 3000;
+        int anio;
+        for (int i=0; i<vehiculos.length; i++){
+            anio = Integer.parseInt(vehiculos[i].darAnio());
+            if (anio < masAntiguo){
+                masAntiguo = anio;
+                posVehiculoActual = i;
+                buscado = darVehiculoActual();
+            }
+        }
         return buscado;
     }
 
@@ -334,7 +343,10 @@ public class CalculadorImpuestos {
      */
     public double promedioPreciosVehiculos() {
         double promedio = 0.0;
-
+	for (Vehiculo v: vehiculos){
+            promedio = promedio + v.darPrecio();
+        }
+        promedio = (promedio/vehiculos.length);
         return promedio;
     }
 
